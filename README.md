@@ -22,10 +22,11 @@ With external config file:
     docker run -d --net host --name softether -v /data/vpnconfig:/vpn babim/softether
 
 volume dir:
+```
 /vpn/vpn_server.config
 /vpn/logvpn
 create auto if empty
-
+```
 With external config file: (option 2)
 
     touch /etc/vpnserver/vpn_server.config
