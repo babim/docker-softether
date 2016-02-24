@@ -69,4 +69,4 @@ Certificate volumes support (like `-v` or `--volumes-from`) will be added at som
   [1]: https://www.softether.org/
   [2]: https://github.com/SoftEtherVPN/SoftEtherVPN
   [3]: https://docs.docker.com/reference/commandline/run/
-  [4]: https://github.com/siomiz/SoftEtherVPN/raw/master/LICENSE
+  [4]: https://github.com/babim/docker-softether/raw/single/LICENSE
