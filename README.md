@@ -1,5 +1,5 @@
 # A simple single-user [SoftEther VPN][1] server Docker image
-Thanks siomiz
+Thanks siomiz - https://github.com/siomiz/SoftEtherVPN/tree/master
 
 **Note:** OpenVPN support is enabled on :latest image. STDOUT (`docker log`) format has changed as a result.
 
