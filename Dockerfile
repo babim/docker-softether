@@ -1,12 +1,8 @@
 # SoftEther VPN server
+FROM babim/debianbase
 
-FROM debian:8
-MAINTAINER Frank Rosquin <frank.rosquin@gmail.com>
-
-#ENV VERSION v4.18-9570-rtm-2015.07.26
 ENV VERSION v4.19-9599-beta-2015.10.19
 WORKDIR /usr/local/vpnserver
-
 
 RUN apt-get update &&\
         apt-get -y -q install gcc make wget && \
@@ -18,9 +14,13 @@ RUN apt-get update &&\
         make i_read_and_agree_the_license_agreement &&\
         apt-get purge -y -q --auto-remove gcc make wget
 
+RUN mkdir /vpn /etc-start && cp /usr/local/vpnserver/vpn_server.config /etc-start && cp /etc-start/vpn_server.config /vpn && \ 
+        rm -f /usr/local/vpnserver/vpn_server.config && ln -s /vpn/vpn_server.config /usr/local/vpnserver/vpn_server.config
+
 ADD runner.sh /usr/local/vpnserver/runner.sh
 RUN chmod 755 /usr/local/vpnserver/runner.sh
 
+VOLUME /vpn
 EXPOSE 443/tcp 992/tcp 1194/tcp 1194/udp 5555/tcp 500/udp 4500/udp
 
 ENTRYPOINT ["/usr/local/vpnserver/runner.sh"]
