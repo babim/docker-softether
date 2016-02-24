@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ ! -f "/vpn/vpn_server.config" ]; then
-  cp /etc-start/vpn_server.config /vpn/vpn_server.config
+  touch /vpn/vpn_server.config
 fi
 
 if [ ! -d "/var/log/vpnserver/security_log" ]; then
