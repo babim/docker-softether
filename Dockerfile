@@ -14,9 +14,8 @@ RUN apt-get update &&\
         make i_read_and_agree_the_license_agreement &&\
         apt-get purge -y -q --auto-remove gcc make wget
 
-RUN mkdir -p /vpn /etc-start/logvpn && rm -rf /var/log/vpnserver && ln -s /etc-start/logvpn /var/log/vpnserver
-RUN cp /usr/local/vpnserver/vpn_server.config /etc-start && cp /etc-start/vpn_server.config /vpn && \ 
-        rm -f /usr/local/vpnserver/vpn_server.config && ln -s /vpn/vpn_server.config /usr/local/vpnserver/vpn_server.config
+RUN mkdir -p /vpn/logvpn && rm -rf /var/log/vpnserver && ln -s /vpn/logvpn /var/log/vpnserver
+RUN touch /vpn/vpn_server.config && ln -s /vpn/vpn_server.config /usr/local/vpnserver/vpn_server.config
 
 ADD runner.sh /usr/local/vpnserver/runner.sh
 RUN chmod 755 /usr/local/vpnserver/runner.sh
