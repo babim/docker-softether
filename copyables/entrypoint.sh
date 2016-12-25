@@ -11,19 +11,25 @@ fi
 if [ ! -f /opt/vpn_server.config ]; then
 
 : ${PSK:='notasecret'}
-: ${USERNAME:=user$(cat /dev/urandom | tr -dc '0-9' | fold -w 4 | head -n 1)}
 
 printf '# '
 printf '=%.0s' {1..24}
 echo
-echo \# ${USERNAME}
 
-if [[ $PASSWORD ]]
+if [[ $USERS ]]
 then
-  echo '# <use the password specified at -e PASSWORD>'
+  echo '# <use the password specified at -e USERS>'
 else
-  PASSWORD=$(cat /dev/urandom | tr -dc '0-9' | fold -w 20 | head -n 1 | sed 's/.\{4\}/&./g;s/.$//;')
-  echo \# ${PASSWORD}
+  : ${USERNAME:=user$(cat /dev/urandom | tr -dc '0-9' | fold -w 4 | head -n 1)}
+  echo \# ${USERNAME}
+  
+  if [[ $PASSWORD ]]
+  then
+    echo '# <use the password specified at -e PASSWORD>'
+  else
+    PASSWORD=$(cat /dev/urandom | tr -dc '0-9' | fold -w 20 | head -n 1 | sed 's/.\{4\}/&./g;s/.$//;')
+    echo \# ${PASSWORD}
+  fi
 fi  
 
 printf '# '
@@ -42,6 +48,9 @@ while : ; do
   sleep 1
 done
 
+# About command to grab version number
+/opt/vpncmd localhost /SERVER /CSV /CMD About | head -2 | tail -1 | sed 's/^/# /;'
+
 # enable L2TP_IPsec
 /opt/vpncmd localhost /SERVER /CSV /CMD IPsecEnable /L2TP:yes /L2TPRAW:yes /ETHERIP:no /PSK:${PSK} /DEFAULTHUB:DEFAULT
 
@@ -51,7 +60,11 @@ done
 # enable OpenVPN
 /opt/vpncmd localhost /SERVER /CSV /CMD OpenVpnEnable yes /PORTS:1194
 
-if [[ "*${CERT}*" != "**" && "*${KEY}*" != "**" ]]; then
+# set server certificate & key
+if [[ -f server.crt && -f server.key ]]; then
+  /opt/vpncmd localhost /SERVER /CSV /CMD ServerCertSet /LOADCERT:server.crt /LOADKEY:server.key
+
+elif [[ "*${CERT}*" != "**" && "*${KEY}*" != "**" ]]; then
   # server cert/key pair specified via -e
   CERT=$(echo ${CERT} | sed -r 's/\-{5}[^\-]+\-{5}//g;s/[^A-Za-z0-9\+\/\=]//g;')
   echo -----BEGIN CERTIFICATE----- > server.crt
@@ -82,17 +95,39 @@ cat softether.ovpn
 /opt/vpncmd localhost /SERVER /CSV /HUB:DEFAULT /CMD LogDisable security
 
 # add user
-/opt/vpncmd localhost /SERVER /HUB:DEFAULT /CSV /CMD UserCreate ${USERNAME} /GROUP:none /REALNAME:none /NOTE:none
-/opt/vpncmd localhost /SERVER /HUB:DEFAULT /CSV /CMD UserPasswordSet ${USERNAME} /PASSWORD:${PASSWORD}
 
+adduser () {
+    printf " $1"
+    /opt/vpncmd localhost /SERVER /HUB:DEFAULT /CSV /CMD UserCreate $1 /GROUP:none /REALNAME:none /NOTE:none
+    /opt/vpncmd localhost /SERVER /HUB:DEFAULT /CSV /CMD UserPasswordSet $1 /PASSWORD:$2
+}
+
+printf '# Creating user(s):'
+
+if [[ $USERS ]]
+then
+  while IFS=';' read -ra USER; do
+    for i in "${USER[@]}"; do
+      IFS=':' read username password <<< "$i"
+      # echo "Creating user: ${username}"
+      adduser $username $password
+    done
+  done <<< "$USERS"
+else
+  adduser $USERNAME $PASSWORD
+fi
+
+echo
+
+export USERS='**'
 export PASSWORD='**'
 
 # set password for hub
-HPW=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 16 | head -n 1)
+: ${HPW:=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 16 | head -n 1)}
 /opt/vpncmd localhost /SERVER /HUB:DEFAULT /CSV /CMD SetHubPassword ${HPW}
 
 # set password for server
-SPW=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 20 | head -n 1)
+: ${SPW:=$(cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 20 | head -n 1)}
 /opt/vpncmd localhost /SERVER /CSV /CMD ServerPasswordSet ${SPW}
 
 /opt/vpnserver stop 2>&1 > /dev/null
@@ -107,4 +142,3 @@ echo \# [initial setup OK]
 fi
 
 exec "$@"
-
