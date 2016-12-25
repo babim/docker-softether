@@ -33,16 +33,16 @@ create auto if empty
 With external config file: (option 2)
 
     touch /etc/vpnserver/vpn_server.config
-    docker run -d -v /etc/vpnserver/vpn_server.config:/usr/local/vpnserver/vpn_server.config --net host --name softether babim/softether
+    docker run -d -v /etc/vpnserver/vpn_server.config:/usr/local/vpnserver/vpn_server.config --net host --cap-add NET_ADMIN --name softether babim/softether
 
 If you want to keep the logs in a data container:
 
     docker run -d --name softether-logs --volume /var/log/vpnserver busybox:latest /bin/true
-    docker run -d --net host --name softether --volumes-from softether-logs babim/softether
+    docker run -d --net host --cap-add NET_ADMIN --name softether --volumes-from softether-logs babim/softether
 
 All together now:
 
     touch /etc/vpnserver/vpn_server.config
     docker run -d --name softether-logs --volume /var/log/vpnserver busybox:latest /bin/true
-    docker run -d -v /etc/vpnserver/vpn_server.config:/usr/local/vpnserver/vpn_server.config --volumes-from softether-logs --net host --name softether babim/softether
+    docker run -d -v /etc/vpnserver/vpn_server.config:/usr/local/vpnserver/vpn_server.config --volumes-from softether-logs --net host --cap-add NET_ADMIN --name softether babim/softether
 
