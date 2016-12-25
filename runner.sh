@@ -7,8 +7,8 @@
 [[ -d /var/log/vpnserver/server_log ]] || mkdir -p /var/log/vpnserver/server_log
 
 chmod -R 777 /var/log/vpnserver/
-ln -s /var/log/vpnserver/*_log /usr/local/vpnserver/
+ln -s /var/log/vpnserver/*_log /usr/vpnserver/
 
-exec /usr/local/vpnserver/vpnserver execsvc
+exec /usr/vpnserver/vpnserver execsvc
 
 exit $?
