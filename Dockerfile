@@ -23,12 +23,12 @@ RUN set -e \
     && rm -rf /var/cache/apk/* ${TEMP_DIR}
 
 RUN mkdir -p /vpn/logvpn && rm -rf /var/log/vpnserver && ln -s /vpn/logvpn /var/log/vpnserver
-RUN touch /vpn/vpn_server.config && ln -s /vpn/vpn_server.config /usr/local/vpnserver/vpn_server.config
+RUN touch /vpn/vpn_server.config && ln -s /vpn/vpn_server.config /usr/vpnserver/vpn_server.config
 
-ADD runner.sh /usr/local/vpnserver/runner.sh
-RUN chmod 755 /usr/local/vpnserver/runner.sh
+ADD runner.sh /usr/vpnserver/runner.sh
+RUN chmod 755 /usr/vpnserver/runner.sh
 
 VOLUME /vpn
 EXPOSE 1071/tcp 1194/tcp 1194/udp 443/tcp 4500/udp 500/udp 5555/tcp 992/tcp
 
-ENTRYPOINT ["/usr/local/vpnserver/runner.sh"]
+ENTRYPOINT ["/usr/vpnserver/runner.sh"]
